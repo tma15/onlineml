@@ -5,6 +5,7 @@ A C++ library of online machine learning algorithms.
 ```
 git clone https://github.com/tma15/onlineml.git
 cd onlineml
+autoreconf -iv
 ./configure --prefix=/path/to/install
 make
 make install
