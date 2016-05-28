@@ -63,6 +63,7 @@ make python
 
 ```
 import sys
+sys.path.append("/path/to/onlineml/swig/")
 import onlineml
 
 def accuracy_score(x, y):
