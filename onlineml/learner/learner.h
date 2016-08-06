@@ -4,8 +4,7 @@
 #define INCLUDED_LEARNER
 
 #ifndef INCLUDED_DICT
-//#include "include/dict.h"
-#include <onlineml/dict.h>
+#include <onlineml/common/dict.h>
 #endif
 
 class Learner {
@@ -17,11 +16,14 @@ class Learner {
         Learner(){
         };
         ~Learner(){};
-        virtual void fit(std::vector< std::map<std::string, float> > x, std::vector<std::string> y){
-        };
+        virtual void fit(std::vector< std::map<std::string, float> > x,
+                std::vector<std::string> y){};
+        virtual void fit2(std::vector< std::vector< std::pair<std::string, float> > > x,
+                std::vector<std::string> y){};
         virtual int predict(std::map<std::string, float > x){};
         virtual const char* id2label(int id){};
         virtual void save(const char*){};
+        virtual void save2(const char*){};
 };
 
 #endif

@@ -7,13 +7,17 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_FILES([Makefile
-		 src/include/Makefile
-		 src/sample/Makefile])
+		 onlineml/common/Makefile
+		 onlineml/sample/Makefile
+		 onlineml/learner/Makefile
+		 onlineml/util/Makefile
+		 ])
 
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_LIBTOOL
 
 # Checks for libraries.
 

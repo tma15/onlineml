@@ -5,12 +5,10 @@
 
 #ifndef INCLUDED_PERCEPTRON
 #define INCLUDED_PERCEPTRON
-//#include "learner.h"
 #include <onlineml/learner/learner.h>
 
 #ifndef INCLUDED_DICT
-//#include "include/dict.h"
-#include <onlineml/dict.h>
+#include <onlineml/common/dict.h>
 #endif
 
 class Perceptron: public Learner {
@@ -26,9 +24,12 @@ class Perceptron: public Learner {
         virtual ~Perceptron() {
         };
         void fit(std::vector< std::map<std::string, float> > x, std::vector<std::string> y);
+        void fit2(std::vector< std::vector< std::pair<std::string, float> > > x,
+                std::vector<std::string> y);
         int predict(std::map<std::string, float > x);
         const char* id2label(int id);
         void save(const char*);
+        void save2(const char*);
 };
 
 const char* Perceptron::id2label(int id) {
@@ -104,6 +105,75 @@ void Perceptron::fit(std::vector< std::map<std::string, float> > x,
     }
 }
 
+void Perceptron::fit2(std::vector< std::vector< std::pair<std::string, float> > > x,
+        std::vector<std::string> y) {
+    int num_data = x.size();
+    for (int i=0; i < num_data; i++) {
+
+        if (!this->labels.has_elem(y[i])) {
+            this->labels.add_elem(y[i]);
+        }
+        int yid = this->labels.get_id(y[i]);
+
+        for (int k=this->weight.size(); k <= yid; k++) {
+            std::vector<float> w;
+            this->weight.push_back(w);
+        }
+        
+        std::vector< std::pair<int, float> > fv;
+        for (int _f = 0; _f < x[i].size(); ++_f) {
+            std::string ft = x[i][_f].first;
+            float val = x[i][_f].second;
+
+            if (!this->features.has_elem(ft)) {
+                this->features.add_elem(ft);
+            }
+            int fid = this->features.get_id(ft);
+            std::pair<int, float> ftval = std::make_pair(fid, val);
+            fv.push_back(ftval);
+        }
+
+        int argmax = -1;
+        float max = -1e5;
+
+        for (int j=0; j < this->labels.size(); j++) {
+            std::vector<float>* w_j = &this->weight[j];
+
+            float dot = 0.;
+
+            /* iterate over features */
+            for (size_t _f=0; _f < fv.size(); _f++) {
+                int fid = fv[_f].first;
+                float val = fv[_f].second;
+
+                for (int k=(*w_j).size(); k <= fid; k++) {
+                    (*w_j).push_back(0.);
+                }
+
+                dot += val * (*w_j)[fid];
+            }
+
+            if (dot >= max) {
+                argmax = j;
+                max = dot;
+            }
+        }
+
+        if (argmax != yid) {
+            std::vector<float>* w_t = &this->weight[yid];
+            std::vector<float>* w_f = &this->weight[argmax];
+            for (size_t _f=0; _f < fv.size(); _f++) {
+                int fid = fv[_f].first;
+                float val = fv[_f].second;
+
+                (*w_t)[fid] += 1. * val;
+                (*w_f)[fid] -= 1. * val;
+            }
+        }
+    }
+}
+
+
 int Perceptron::predict(std::map<std::string, float> x) {
     int argmax = -1;
     float max = -1e5;
@@ -159,5 +229,54 @@ void Perceptron::save(const char* filename) {
         }
     }
 }
+
+void Perceptron::save2(const char* filename) {
+    FILE* fp = fopen(filename, "wb");
+
+    int s = this->labels.size();
+    fwrite(&s, sizeof(int), 1, fp);
+    for (int i=0; i < this->labels.size(); i++) {
+        std::cout << "str:" << this->labels.elems[i] << std::endl;
+        const char* label = this->labels.elems[i].c_str();
+//        fwrite(&this->labels.elems[i], sizeof(std::string), 1, fp);
+        fwrite(&label, sizeof(label), 1, fp);
+    }
+
+    for (int i=0; i < this->labels.size(); i++) {
+        int num_nonzero = 0;
+        for (int j=0; j < this->features.size(); j++) {
+            if (this->weight[i][j] != 0.) {
+                num_nonzero++;
+            }
+        }
+
+        fwrite(&num_nonzero, sizeof(int), 1, fp);
+        for (int j=0; j < this->features.size(); j++) {
+//            std::string ft = this->features.get_elem(j);
+            const char* ft = this->features.get_elem(j).c_str();
+            if (this->weight[i][j]!=0.) {
+//                ofs << ft << "\t" << this->weight[i][j] << std::endl;
+                fwrite(&ft, sizeof(ft), 1, fp);
+                fwrite(&this->weight[i][j], sizeof(float), 1, fp);
+            }
+        }
+    }
+    fclose(fp);
+
+    FILE* fpr = fopen(filename, "rb");
+    int size;
+    char* str = new char[4096];
+
+    fread(&size, sizeof(int), 1, fpr);
+    printf("read label size:%d\n", size);
+
+    for (int i=0; i < size; ++i) {
+        fread(&str, sizeof(str), 1, fpr);
+        printf("read label:%s\n", str);
+    }
+    fclose(fpr);
+}
+
+
 
 #endif
