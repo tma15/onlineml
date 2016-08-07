@@ -1,6 +1,7 @@
 *.o
 *.swp
 .*DS*Store
+local
 
 # http://www.gnu.org/software/automake
 
@@ -23,3 +24,4 @@
 /install-sh
 /missing
 /stamp-h1
+
