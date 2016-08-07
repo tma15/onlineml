@@ -35,10 +35,16 @@ void Dict::add_elem(std::string elem) {
 }
 
 std::string Dict::get_elem(int id) {
+    if (this->elems.size() <= id) {
+        return "";
+    }
     return this->elems[id];
 }
 
 int Dict::get_id(std::string elem) {
+    if (this->ids.count(elem) == 0) {
+        return -1;
+    }
     return this->ids[elem];
 }
 #endif

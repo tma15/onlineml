@@ -20,8 +20,11 @@ class Learner {
                 std::vector<std::string> y){};
         virtual void fit2(std::vector< std::vector< std::pair<std::string, float> > > x,
                 std::vector<std::string> y){};
-        virtual int predict(std::map<std::string, float > x){};
+        virtual int predict(std::map<std::string, float > x){ return -1; };
+        virtual int predict2(std::vector< std::pair<std::string, float> > x){ return -1; };
+        virtual Dict get_label_dict() { return labels; };
         virtual const char* id2label(int id){};
+        virtual int label2id(std::string label){};
         virtual void save(const char*){};
         virtual void save2(const char*){};
 };

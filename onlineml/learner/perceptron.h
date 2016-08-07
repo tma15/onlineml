@@ -27,13 +27,19 @@ class Perceptron: public Learner {
         void fit2(std::vector< std::vector< std::pair<std::string, float> > > x,
                 std::vector<std::string> y);
         int predict(std::map<std::string, float > x);
+        int predict2(std::vector< std::pair<std::string, float > > x);
         const char* id2label(int id);
+        int label2id(std::string);
         void save(const char*);
         void save2(const char*);
 };
 
 const char* Perceptron::id2label(int id) {
     return this->labels.get_elem(id).c_str();
+};
+
+int Perceptron::label2id(std::string label) {
+    return this->labels.get_id(label);
 };
 
 void Perceptron::fit(std::vector< std::map<std::string, float> > x,
@@ -112,6 +118,7 @@ void Perceptron::fit2(std::vector< std::vector< std::pair<std::string, float> > 
 
         if (!this->labels.has_elem(y[i])) {
             this->labels.add_elem(y[i]);
+//            printf("add label\n");
         }
         int yid = this->labels.get_id(y[i]);
 
@@ -121,7 +128,7 @@ void Perceptron::fit2(std::vector< std::vector< std::pair<std::string, float> > 
         }
         
         std::vector< std::pair<int, float> > fv;
-        for (int _f = 0; _f < x[i].size(); ++_f) {
+        for (size_t _f = 0; _f < x[i].size(); ++_f) {
             std::string ft = x[i][_f].first;
             float val = x[i][_f].second;
 
@@ -204,6 +211,35 @@ int Perceptron::predict(std::map<std::string, float> x) {
     return argmax;
 }
 
+int Perceptron::predict2(std::vector< std::pair<std::string, float> > x) {
+    int argmax = -1;
+    float max = -1e5;
+    for (int j=0; j < this->labels.size(); j++) {
+        /* iterate over features */
+        float dot = 0;
+        for (size_t i=0; i < x.size(); ++i) {
+            std::string ft = x[i].first;
+            float val = x[i].second;
+
+            if (!this->features.has_elem(ft)) {
+                continue;
+            }
+            int fid = this->features.get_id(ft);
+            dot += this->weight[j][fid] * val;
+        }
+
+        if (dot >= max) {
+            max = dot;
+            argmax = j;
+        }
+
+    }
+    if (argmax == -1) {
+        printf("#label:%d\n", this->labels.size());
+    }
+    return argmax;
+}
+
 void Perceptron::save(const char* filename) {
     std::ofstream ofs(filename);
 
@@ -235,46 +271,27 @@ void Perceptron::save2(const char* filename) {
 
     int s = this->labels.size();
     fwrite(&s, sizeof(int), 1, fp);
+
+    s = this->features.size();
+    fwrite(&s, sizeof(int), 1, fp);
+
     for (int i=0; i < this->labels.size(); i++) {
-        std::cout << "str:" << this->labels.elems[i] << std::endl;
-        const char* label = this->labels.elems[i].c_str();
-//        fwrite(&this->labels.elems[i], sizeof(std::string), 1, fp);
-        fwrite(&label, sizeof(label), 1, fp);
+        std::string label = this->labels.elems[i];
+        int s = label.size();
+        fwrite(&s, sizeof(int), 1, fp);
+        fwrite(label.data(), sizeof(char), label.size(), fp);
     }
 
     for (int i=0; i < this->labels.size(); i++) {
-        int num_nonzero = 0;
         for (int j=0; j < this->features.size(); j++) {
-            if (this->weight[i][j] != 0.) {
-                num_nonzero++;
-            }
-        }
-
-        fwrite(&num_nonzero, sizeof(int), 1, fp);
-        for (int j=0; j < this->features.size(); j++) {
-//            std::string ft = this->features.get_elem(j);
-            const char* ft = this->features.get_elem(j).c_str();
-            if (this->weight[i][j]!=0.) {
-//                ofs << ft << "\t" << this->weight[i][j] << std::endl;
-                fwrite(&ft, sizeof(ft), 1, fp);
-                fwrite(&this->weight[i][j], sizeof(float), 1, fp);
-            }
+            std::string ft = this->features.get_elem(j);
+            int s = ft.size();
+            fwrite(&s, sizeof(int), 1, fp);
+            fwrite(ft.data(), sizeof(char), ft.size(), fp);
+            fwrite(&this->weight[i][j], sizeof(float), 1, fp);
         }
     }
     fclose(fp);
-
-    FILE* fpr = fopen(filename, "rb");
-    int size;
-    char* str = new char[4096];
-
-    fread(&size, sizeof(int), 1, fpr);
-    printf("read label size:%d\n", size);
-
-    for (int i=0; i < size; ++i) {
-        fread(&str, sizeof(str), 1, fpr);
-        printf("read label:%s\n", str);
-    }
-    fclose(fpr);
 }
 
 
