@@ -11,6 +11,14 @@ make
 make install
 ```
 
+## Training a model
+```
+/path/to/install/bin/train_onlineml_model -e <NUM_EPOCH> -m <MODEL_FILE> <TESTING_FILE> <TRAINING_FILE>
+```
+
+Only perceptron algorithm is supported now.
+
+
 ## Use from C++
 ```
 #include <stdio.h>
