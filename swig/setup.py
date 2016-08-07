@@ -4,7 +4,7 @@ from distutils.core import setup, Extension
 
 example_module = Extension('_onlineml',
     sources=['onlineml_wrap.cxx'],
-    include_dirs=["../src/include"],
+    include_dirs=["../"],
     extra_compile_args=["-O3"],
     language="c++",
 )
