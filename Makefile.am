@@ -1,3 +1,7 @@
+lib_LTLIBRARIES = libonlineml.la
+libonlineml_la_SOURCES = \
+			  onlineml/util/string_proc.h
+
 SUBDIRS = onlineml/common onlineml/learner onlineml/util onlineml/sample
 
 PREFIX = onlineml
@@ -8,6 +12,4 @@ python:
 	cd -
 
 
-lib_LTLIBRARIES = libonlineml.la
-libonlineml_la_SOURCES = \
-			  onlineml/util/string_proc.h
+
