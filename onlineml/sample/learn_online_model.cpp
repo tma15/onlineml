@@ -9,16 +9,16 @@
 
 #include <onlineml/common/classifier.h>
 #include <onlineml/learner/perceptron.h>
+#include <onlineml/learner/averaged_perceptron.h>
 #include <onlineml/util/string_proc.h>
 
 int main(int argc, char* argv[]) {
-    /* parse command options */
     int result;
     int num_opt = 0;
     int epoch = 1;
     std::string modelfile;
-    std::string alg;
-    while((result=getopt(argc, argv, "e:m:"))!=-1){
+    std::string alg = "p";
+    while((result=getopt(argc, argv, "e:m:a:"))!=-1){
         switch (result) {
             case 'm':
                 modelfile = std::string(optarg);
@@ -38,12 +38,20 @@ int main(int argc, char* argv[]) {
     printf("modelfile:%s\n", modelfile.c_str());
     printf("algoirthm:%s\n", alg.c_str());
 
+    Learner* p;
+    if (alg == "p") {
+        p = new Perceptron();
+    } else if (alg == "ap") {
+        p = new AveragedPerceptron();
+    } else {
+        printf("invalid algorithm: %s\n", alg.c_str());
+        exit(1);
+    }
+
     std::ifstream ifs(argv[num_opt+1]);
     num_opt += 1;
     std::string line;
 
-//    Dict labels;
-//    Dict features;
     std::vector<std::string> y;
     std::vector< std::vector< std::pair<std::string, float> > > x;
 
@@ -70,18 +78,15 @@ int main(int argc, char* argv[]) {
         x.push_back(fv);
     }
 
-    Learner* p = new Perceptron();
-
     for (int t=0; t<epoch; t++) {
         printf("epoch:%d/%d\n", t+1, epoch);
-        p->fit2(x, y);
+        p->fit(x, y);
     }
 
-//    p->save("model");
-    p->save2("model");
+    p->save("model");
 
     Classifier cls;
-    cls.load2("model");
+    cls.load("model");
 
     std::ifstream ifs2(argv[num_opt+1]);
     num_opt += 1;
@@ -109,9 +114,9 @@ int main(int argc, char* argv[]) {
             fv.push_back(std::make_pair(f, v));
         }
 
-//        int pred_ = p->predict2(fv);
+//        int pred_ = p->predict(fv);
 //        std::string pred = p->id2label(pred_);
-        int pred_ = cls.predict2(fv);
+        int pred_ = cls.predict(fv);
         std::string pred = cls.id2label(pred_);
 
 //        int true_ = p->label2id(label);
@@ -124,7 +129,7 @@ int main(int argc, char* argv[]) {
         accuracy = float(num_corr) / float(num_total);
 
         if (num_total % 1000==0) {
-            printf("acc:%f (%d/%d) pred:%s(id:%d) true:%s(id:%d)\n",
+            printf("acc:%f (%d/%d) pred:%s (id:%d) true:%s (id:%d)\n",
                     accuracy, num_corr, num_total,
                     pred.c_str(), pred_, label.c_str(), true_);
         }

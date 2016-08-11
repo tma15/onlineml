@@ -18,11 +18,15 @@ make install
 
 - `label` .=. characters
 - `feature` .=. characters
-- `value` .=. real values
+- `value` .=. real value
 
 ## Training a model
 ```
-/path/to/install/bin/train_onlineml_model -e <NUM_EPOCH> -m <MODEL_FILE> <TESTING_FILE> <TRAINING_FILE>
+/path/to/install/bin/train_onlineml_model -a (a|ap) -e <NUM_EPOCH> -m <MODEL_FILE> <TESTING_FILE> <TRAINING_FILE>
 ```
 
-Only perceptron algorithm is supported now.
+- `-a`: learning algorithm
+  - `p`: perceptron
+  - `ap`: averaged perceptron
+- `-e`: number of epoch
+- `-m`: model file name

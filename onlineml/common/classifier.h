@@ -31,10 +31,11 @@ class Classifier {
         std::vector< std::vector<float> > weight;
 
         Classifier();
+//        void load(const char* filename);
+//        void load2(const char* filename);
         void load(const char* filename);
-        void load2(const char* filename);
-        int predict(std::map<std::string, float > x);
-        int predict2(std::vector< std::pair<std::string, float> > x);
+//        int predict(std::map<std::string, float > x);
+        int predict(std::vector< std::pair<std::string, float> > x);
         const char* id2label(int id);
         int label2id(std::string label);
 };
@@ -44,68 +45,78 @@ Classifier::Classifier() {
     this->labels = Dict();
 }
 
+//void Classifier::load(const char* filename) {
+//    std::ifstream ifs(filename);
+
+//    std::string labelsize_str;
+//    getline(ifs, labelsize_str);
+
+//    int labelsize = atoi(labelsize_str.c_str());
+
+//    for (int i=0; i < labelsize; i++) {
+//        std::string label;
+//        getline(ifs, label);
+
+//        this->labels.add_elem(label);
+
+//        std::vector<float> w;
+//        this->weight.push_back(w);
+//    }
+
+
+//    for (int i=0; i < labelsize; i++) {
+//        std::string num_nonzero_str;
+//        getline(ifs, num_nonzero_str);
+//        int num_nonzero = atoi(num_nonzero_str.c_str());
+
+//        for (int j=0; j < num_nonzero; j++) {
+//            std::string ftval_str;
+//            getline(ifs, ftval_str);
+//            std::vector<std::string> sp;
+//            split(ftval_str, "\t", sp);
+//            std::string ft = sp[0];
+//            std::string valstr = sp[1];
+
+//            std::stringstream ss(valstr);
+//            float val;
+//            ss >> val;
+
+//            if (!this->features.has_elem(ft)) {
+//                this->features.add_elem(ft);
+//            }
+//            int fid = this->features.get_id(ft);
+
+//            for (int k=this->weight[i].size(); k <= fid; k++) {
+//                this->weight[i].push_back(0.);
+//            }
+//            this->weight[i][fid] = val;
+//        }
+//    }
+//}
+
 void Classifier::load(const char* filename) {
-    std::ifstream ifs(filename);
-
-    std::string labelsize_str;
-    getline(ifs, labelsize_str);
-
-    int labelsize = atoi(labelsize_str.c_str());
-
-    for (int i=0; i < labelsize; i++) {
-        std::string label;
-        getline(ifs, label);
-
-        this->labels.add_elem(label);
-
-        std::vector<float> w;
-        this->weight.push_back(w);
-    }
-
-
-    for (int i=0; i < labelsize; i++) {
-        std::string num_nonzero_str;
-        getline(ifs, num_nonzero_str);
-        int num_nonzero = atoi(num_nonzero_str.c_str());
-
-//        std::cout << "NONZ:" << num_nonzero << std::endl;
-        for (int j=0; j < num_nonzero; j++) {
-            std::string ftval_str;
-            getline(ifs, ftval_str);
-            std::vector<std::string> sp;
-            split(ftval_str, "\t", sp);
-            std::string ft = sp[0];
-            std::string valstr = sp[1];
-
-            std::stringstream ss(valstr);
-            float val;
-            ss >> val;
-
-            if (!this->features.has_elem(ft)) {
-                this->features.add_elem(ft);
-            }
-            int fid = this->features.get_id(ft);
-
-            for (int k=this->weight[i].size(); k <= fid; k++) {
-                this->weight[i].push_back(0.);
-            }
-            this->weight[i][fid] = val;
-        }
-    }
-}
-
-void Classifier::load2(const char* filename) {
     FILE* fp = fopen(filename, "rb");
     int num_label;
     int num_feature;
+
+    int a_size;
+    fread(&a_size, sizeof(int), 1, fp);
+
+    std::string algorithm;
+    for (int k=0; k < a_size; ++k) {
+        char ch;
+        fread(&ch, sizeof(char), 1, fp);
+        algorithm.push_back(ch);
+    }
+    printf("loaded algorithm:%s\n", algorithm.c_str());
+
 
     fread(&num_label, sizeof(int), 1, fp);
     fread(&num_feature, sizeof(int), 1, fp);
 
     for (int i=0; i < num_label; ++i) {
         int label_size;
-        int k = fread(&label_size, sizeof(int), 1, fp);
-//        printf("label_size:%d k=%d\n", label_size, k);
+        fread(&label_size, sizeof(int), 1, fp);
         std::string label;
 
         for (int k=0; k < label_size; ++k) {
@@ -113,7 +124,6 @@ void Classifier::load2(const char* filename) {
             fread(&ch, sizeof(char), 1, fp);
             label.push_back(ch);
         }
-//        printf("label:%s\n", label.c_str());
 
         this->labels.add_elem(label);
 
@@ -130,7 +140,7 @@ void Classifier::load2(const char* filename) {
             std::string ft;
             for (int k=0; k < ft_size; ++k) {
                 char ch;
-                size_t sz = fread(&ch, sizeof(char), 1, fp);
+                fread(&ch, sizeof(char), 1, fp);
                 ft.push_back(ch);
             }
 
@@ -209,38 +219,38 @@ int Classifier::label2id(std::string label) {
     return this->labels.get_id(label);
 }
 
-int Classifier::predict(std::map<std::string, float> x) {
-    int argmax = -1;
-    float max = -1e5;
-    for (int j=0; j < this->labels.size(); j++) {
-        /* iterate over features */
-        float dot = 0;
-        for (std::map<std::string, float>::iterator it=x.begin();
-                it!=x.end(); it++) {
-            std::string ft = it->first;
-            float val = it->second;
+//int Classifier::predict(std::map<std::string, float> x) {
+//    int argmax = -1;
+//    float max = -1e5;
+//    for (int j=0; j < this->labels.size(); j++) {
+//        /* iterate over features */
+//        float dot = 0;
+//        for (std::map<std::string, float>::iterator it=x.begin();
+//                it!=x.end(); it++) {
+//            std::string ft = it->first;
+//            float val = it->second;
 
-            if (!this->features.has_elem(ft)) {
-                continue;
-            }
-            int fid = this->features.get_id(ft);
-            dot += this->weight[j][fid] * val;
-        }
+//            if (!this->features.has_elem(ft)) {
+//                continue;
+//            }
+//            int fid = this->features.get_id(ft);
+//            dot += this->weight[j][fid] * val;
+//        }
 
-        if (dot >= max) {
-            max = dot;
-            argmax = j;
-        }
+//        if (dot >= max) {
+//            max = dot;
+//            argmax = j;
+//        }
 
-    }
-    if (argmax == -1) {
-        printf("#label:%d\n", this->labels.size());
-    }
-    return argmax;
-}
+//    }
+//    if (argmax == -1) {
+//        printf("#label:%d\n", this->labels.size());
+//    }
+//    return argmax;
+//}
 
 
-int Classifier::predict2(std::vector< std::pair<std::string, float> > x) {
+int Classifier::predict(std::vector< std::pair<std::string, float> > x) {
     int argmax = -1;
     float max = -1e5;
     for (int j=0; j < this->labels.size(); j++) {
