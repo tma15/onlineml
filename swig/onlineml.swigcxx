@@ -9,6 +9,7 @@
 #define SWIG_FILE_WITH_INIT
 #include <onlineml/learner/learner.h>
 #include <onlineml/learner/perceptron.h>
+#include <onlineml/learner/averaged_perceptron.h>
 #include <onlineml/common/classifier.h>
 %}
 
@@ -20,4 +21,5 @@
 
 %include "onlineml/learner/learner.h"
 %include "onlineml/learner/perceptron.h"
+%include "onlineml/learner/averaged_perceptron.h"
 %include "onlineml/common/classifier.h"

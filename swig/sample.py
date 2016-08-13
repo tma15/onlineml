@@ -3,24 +3,19 @@ import sys
 
 import onlineml
 
-def accuracy_score(x, y):
-    n = len(x)
-    m = 0.
-    for i in range(n):
-        if x[i]==y[i]:
-            m += 1.
-    return m/float(n)
 
-p = onlineml.Perceptron()
+#p = onlineml.Perceptron()
+p = onlineml.AveragedPerceptron()
 
 i = 0
-x_train = []
-y_train = []
+x_train = onlineml.PairVectors()
+y_train = onlineml.StringVectors()
+
 for line in open(sys.argv[1]):
     sp = line.strip().split()
     i += 1
     y_i = sp[0]
-    x_i = []
+    x_i = onlineml.PairVector()
     for elem in sp[1:]:
         sp_ = elem.split(":")
         ft = sp_[0]
@@ -29,20 +24,25 @@ for line in open(sys.argv[1]):
 
     x_train.append(x_i)
     y_train.append(y_i)
-    if i % 1000 == 0:
-        print(i)
-        break
-p.fit2(onlineml.PairVectors(x_train), onlineml.StringVectors(y_train))
+    if i % 10000 == 0:
+        print("reading training data: {}".format(i))
+#        break
 
-p.save2("model-swig-python")
+print("training model ...")
+epoch = 3
+for i in range(epoch):
+    p.fit(x_train, y_train)
 
+print("saving model ...")
+p.save("model-swig-python")
+
+print("loading model ...")
 cls = onlineml.Classifier()
-cls.load2("model-swig-python")
+cls.load("model-swig-python")
 
-y_pred1 = []
-y_pred2 = []
-y_true = []
-i = 0
+accuracy_score = 0
+num_corr = 0
+num_total = 0
 for line in open(sys.argv[2]):
     sp = line.strip().split()
     y_true_i = sp[0]
@@ -55,20 +55,17 @@ for line in open(sys.argv[2]):
 
     x_test = onlineml.PairVector(x_i)
 
-    i1 = p.predict2(x_test)
-    i2 = cls.predict2(x_test)
-    y_pred_i1 = p.id2label(i1)
-    y_pred_i2 = cls.id2label(i2)
+    pred_i = cls.predict(x_test)
+    y_pred_i = cls.id2label(pred_i)
 
-    y_true.append(y_true_i)
-    y_pred1.append(y_pred_i1)
-    y_pred2.append(y_pred_i2)
+    if y_true_i == y_pred_i:
+        num_corr += 1
+    num_total += 1
 
-    if i % 1000 == 0:
-        print(y_true_i, y_pred_i1, accuracy_score(y_true, y_pred1))
-        print(y_true_i, y_pred_i2, accuracy_score(y_true, y_pred2))
-        print("")
-    i += 1
+    if num_total % 1000 == 0:
+        accuracy_score = float(num_corr) / float(num_total)
+        print("Acc:{0:.3f} ({1}/{2}) i:{3} true:{4} pred:{5}".format(accuracy_score,
+            num_corr, num_total, num_total, y_true_i, y_pred_i))
 
-print accuracy_score(y_true, y_pred1)
-print accuracy_score(y_true, y_pred22)
+accuracy_score = float(num_corr) / float(num_total)
+print accuracy_score

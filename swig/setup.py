@@ -9,8 +9,8 @@ example_module = Extension('_onlineml',
     language="c++",
 )
 
-setup (name = 'onlineml',
-    version = '0.1',
+setup (name = '@PACKAGE@',
+    version = '@VERSION@',
     author      = "SWIG Docs",
     description = """online machine learning algorithms""",
     ext_modules = [example_module],
