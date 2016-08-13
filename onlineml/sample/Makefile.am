@@ -1,6 +1,8 @@
 bin_PROGRAMS = train_onlineml_model
 train_onlineml_model_SOURCES = \
 			       learn_online_model.cpp \
-			       ../util/string_proc.cpp
+			       arg.h
 
-INCLUDES = -I../util -I../learner
+train_onlineml_model_LDADD = ../../libonlineml.la
+
+# INCLUDES = -I../util -I../learner
