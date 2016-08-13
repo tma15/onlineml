@@ -11,6 +11,12 @@ make
 make install
 ```
 
+To install python wrapper,
+
+```
+make python
+```
+
 ## File format
 ```
 <label> <fature>:<value> ... <feature>:<value>
