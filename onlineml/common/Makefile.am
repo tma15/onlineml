@@ -1,8 +1,3 @@
-# lib_LTLIBRARIES = libonlineml.la
-# libonlineml_la_SOURCES = \
-#                           onlineml/util.h \
-#                           onlineml/util.cpp
-
 onlinemlincludedir = $(includedir)/onlineml/common
 
 onlinemlinclude_HEADERS = \
@@ -10,8 +5,5 @@ onlinemlinclude_HEADERS = \
 			  dict.h
 
 
-# onlinemllearnerincludedir = $(includedir)/onlineml/learner
-
-# onlinemllearnerinclude_HEADERS = \
-#                         onlineml/learner/learner.h \
-#                         onlineml/learner/perceptron.h 
+noinst_LTLIBRARIES = libcommon.la
+libcommon_la_SOURCES = classifier.h dict.h

@@ -20,6 +20,7 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for header files.
 
