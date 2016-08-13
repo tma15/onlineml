@@ -49,10 +49,6 @@ void Learner::fit(std::vector< std::vector< std::pair<std::string, float> > > x,
         int yid = this->labels.get_id(y[i]);
 
         this->expand_params(yid);
-//        for (int k=this->weight.size(); k <= yid; k++) {
-//            std::vector<float> w;
-//            this->weight.push_back(w);
-//        }
         
         std::vector< std::pair<int, float> > fv;
         for (size_t _f = 0; _f < x[i].size(); ++_f) {
