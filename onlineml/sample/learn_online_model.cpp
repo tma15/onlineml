@@ -11,45 +11,26 @@
 #include <onlineml/learner/perceptron.h>
 #include <onlineml/learner/averaged_perceptron.h>
 #include <onlineml/util/string_proc.h>
+#include "arg.h"
 
 int main(int argc, char* argv[]) {
-    int result;
-    int num_opt = 0;
-    int epoch = 1;
-    std::string modelfile;
-    std::string alg = "p";
-    while((result=getopt(argc, argv, "e:m:a:"))!=-1){
-        switch (result) {
-            case 'm':
-                modelfile = std::string(optarg);
-                num_opt += 2;
-                break;
-            case 'e':
-                epoch = atoi(optarg);
-                num_opt += 2;
-                break;
-            case 'a':
-                alg = std::string(optarg);
-                num_opt += 2;
-                break;
-        }
-    }
+    ArgParser argparser;
+    argparser.parse_args(argc, argv);
+
+    int epoch = argparser.epoch;
+    std::string modelfile = argparser.model_file;
+    std::string alg = argparser.alg;
+
     printf("epoch:%d\n", epoch);
     printf("modelfile:%s\n", modelfile.c_str());
     printf("algoirthm:%s\n", alg.c_str());
-
-    Learner* p;
-    if (alg == "p") {
-        p = new Perceptron();
-    } else if (alg == "ap") {
-        p = new AveragedPerceptron();
-    } else {
-        printf("invalid algorithm: %s\n", alg.c_str());
-        exit(1);
+    printf("trainfile:%s\n", argparser.train_file.c_str());
+    if (argparser.test_file != "") {
+        printf("testfile:%s\n", argparser.test_file.c_str());
     }
 
-    std::ifstream ifs(argv[num_opt+1]);
-    num_opt += 1;
+    Learner* p = argparser.learner;
+    std::ifstream ifs(argparser.train_file.c_str());
     std::string line;
 
     std::vector<std::string> y;
@@ -83,13 +64,15 @@ int main(int argc, char* argv[]) {
         p->fit(x, y);
     }
 
-    p->save("model");
+    p->save(modelfile.c_str());
 
     Classifier cls;
-    cls.load("model");
+    cls.load(modelfile.c_str());
 
-    std::ifstream ifs2(argv[num_opt+1]);
-    num_opt += 1;
+    if (argparser.test_file == "") {
+        exit(1);
+    }
+    std::ifstream ifs2(argparser.test_file.c_str());
 
     int num_corr = 0;
     int num_total = 0;
