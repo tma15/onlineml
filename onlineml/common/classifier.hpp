@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <onlineml/common/dict.h>
+#include <onlineml/common/dict.hpp>
 
 template <typename List>
 void split(const std::string& s, const std::string& delim, List& result) {

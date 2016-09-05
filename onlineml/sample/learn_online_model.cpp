@@ -7,11 +7,11 @@
 #include <string>
 #include <vector>
 
-#include <onlineml/common/classifier.h>
-#include <onlineml/learner/perceptron.h>
-#include <onlineml/learner/averaged_perceptron.h>
-#include <onlineml/util/string_proc.h>
-#include "arg.h"
+#include <onlineml/common/classifier.hpp>
+#include <onlineml/learner/perceptron.hpp>
+#include <onlineml/learner/averaged_perceptron.hpp>
+#include <onlineml/util/string_proc.hpp>
+#include "arg.hpp"
 
 int main(int argc, char* argv[]) {
     ArgParser argparser;

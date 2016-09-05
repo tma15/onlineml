@@ -7,10 +7,10 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
-#include <onlineml/learner/learner.h>
-#include <onlineml/learner/perceptron.h>
-#include <onlineml/learner/averaged_perceptron.h>
-#include <onlineml/common/classifier.h>
+#include <onlineml/learner/learner.hpp>
+#include <onlineml/learner/perceptron.hpp>
+#include <onlineml/common/classifier.hpp>
+#include <onlineml/learner/averaged_perceptron.hpp>
 %}
 
 
@@ -19,7 +19,7 @@
 %template(PairVectors) std::vector< std::vector<std::pair<std::string, float> > >;
 %template(StringVectors) std::vector<std::string>;
 
-%include "onlineml/learner/learner.h"
-%include "onlineml/learner/perceptron.h"
-%include "onlineml/learner/averaged_perceptron.h"
-%include "onlineml/common/classifier.h"
+%include <onlineml/learner/learner.hpp>
+%include <onlineml/learner/perceptron.hpp>
+%include <onlineml/learner/averaged_perceptron.hpp>
+%include <onlineml/common/classifier.hpp>

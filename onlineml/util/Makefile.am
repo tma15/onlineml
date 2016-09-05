@@ -1,5 +1,5 @@
 utildir=$(includedir)/onlineml/util
-util_HEADERS = string_proc.h
+util_HEADERS = string_proc.hpp
 
 noinst_LTLIBRARIES = libutil.la
-libutil_la_SOURCES = string_proc.h string_proc.cpp
+libutil_la_SOURCES = string_proc.hpp string_proc.cpp

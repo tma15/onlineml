@@ -3,11 +3,11 @@
 #define INCLUDED_AVERAGED_PERCEPTRON
 
 #ifndef INCLUDED_LEARNER
-#include <online/learner/learner.h>
+#include <online/learner/learner.hpp>
 #endif
 
 #ifndef INCLUDED_DICT
-#include <online/common/dict.h>
+#include <online/common/dict.hpp>
 #endif 
 
 class AveragedPerceptron: public Learner {

@@ -7,6 +7,6 @@ libonlineml_la_LIBADD = \
 			../learner/liblearner.la
 
 bin_PROGRAMS = train_onlineml_model
-train_onlineml_model_SOURCES = learn_online_model.cpp
+train_onlineml_model_SOURCES = learn_online_model.cpp arg.hpp
 train_onlineml_model_LDADD = libonlineml.la
 

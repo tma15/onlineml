@@ -1,8 +1,8 @@
 learnerdir = $(includedir)/onlineml/learner
 learner_HEADERS = \
-		  learner.h \
-		  perceptron.h 
-		  averaged_perceptron.h 
+		  learner.hpp \
+		  perceptron.hpp \
+		  averaged_perceptron.hpp
 
 noinst_LTLIBRARIES = liblearner.la
-liblearner_la_SOURCES = learner.h perceptron.h averaged_perceptron.h
+liblearner_la_SOURCES = learner.hpp perceptron.hpp averaged_perceptron.hpp

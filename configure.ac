@@ -11,6 +11,7 @@ AC_CONFIG_FILES([Makefile
 		 onlineml/sample/Makefile
 		 onlineml/learner/Makefile
 		 onlineml/util/Makefile
+		 swig/Makefile
 		 ])
 
 
