@@ -1,6 +1,12 @@
 *.o
+*.a
+*.la
 *.swp
+*.Po
+*.Plo
 .*DS*Store
+*.so
+*.so.*
 local
 
 # http://www.gnu.org/software/automake

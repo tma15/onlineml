@@ -68,4 +68,4 @@ for line in open(sys.argv[2]):
             num_corr, num_total, num_total, y_true_i, y_pred_i))
 
 accuracy_score = float(num_corr) / float(num_total)
-print accuracy_score
+print(accuracy_score)
