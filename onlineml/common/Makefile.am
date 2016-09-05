@@ -1,9 +1,9 @@
 onlinemlincludedir = $(includedir)/onlineml/common
 
 onlinemlinclude_HEADERS = \
-			  classifier.h \
-			  dict.h
+			  classifier.hpp \
+			  dict.hpp
 
 
 noinst_LTLIBRARIES = libcommon.la
-libcommon_la_SOURCES = classifier.h dict.h
+libcommon_la_SOURCES = classifier.hpp dict.hpp

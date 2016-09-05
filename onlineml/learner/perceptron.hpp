@@ -6,11 +6,11 @@
 #define INCLUDED_PERCEPTRON
 
 #ifndef INCLUDED_LEARNER
-#include <onlineml/learner/learner.h>
+#include <onlineml/learner/learner.hpp>
 #endif
 
 #ifndef INCLUDED_DICT
-#include <onlineml/common/dict.h>
+#include <onlineml/common/dict.hpp>
 #endif
 
 class Perceptron: public Learner {

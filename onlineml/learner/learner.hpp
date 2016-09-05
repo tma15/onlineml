@@ -2,7 +2,7 @@
 #define INCLUDED_LEARNER
 
 #ifndef INCLUDED_DICT
-#include <onlineml/common/dict.h>
+#include <onlineml/common/dict.hpp>
 #endif
 
 class Learner {
