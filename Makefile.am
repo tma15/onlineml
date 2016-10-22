@@ -1,4 +1,4 @@
-SUBDIRS = onlineml/common onlineml/learner onlineml/util onlineml/sample swig
+SUBDIRS = onlineml/common onlineml/learner onlineml/util onlineml/cmd swig
 
 python:
 	cd swig && \

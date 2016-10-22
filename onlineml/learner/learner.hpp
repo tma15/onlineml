@@ -18,6 +18,7 @@ class Learner {
             this->features = Dict();
             this->labels = Dict();
         };
+        ~Learner(){};
         void fit(std::vector< std::vector< std::pair<std::string, float> > > x,
                 std::vector<std::string> y);
 
@@ -77,10 +78,6 @@ void Learner::fit(std::vector< std::vector< std::pair<std::string, float> > > x,
                 float val = fv[_f].second;
 
                 this->expand_params(j, fid);
-//                for (int k=(*w_j).size(); k <= fid; k++) {
-//                    (*w_j).push_back(0.);
-//                }
-
                 dot += val * (*w_j)[fid];
             }
 
