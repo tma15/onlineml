@@ -19,6 +19,7 @@ class Perceptron: public Learner {
         void expand_params(int yid, int fid);
     public:
         Perceptron(): Learner(){};
+        ~Perceptron(){};
         void update_weight(int true_id, int argmax, std::vector< std::pair<int, float> > fv);
         void save(const char*);
 };

@@ -16,6 +16,7 @@ class AveragedPerceptron: public Learner {
         std::vector< std::vector<float> > weight_a;
     public:
         AveragedPerceptron();
+        ~AveragedPerceptron(){};
         void expand_params(int yid);
         void expand_params(int yid, int fid);
         void update_weight(int true_id, int argmax, std::vector< std::pair<int, float> > fv);

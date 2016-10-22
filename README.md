@@ -1,5 +1,5 @@
 # onlineml
-A C++ library of online machine learning algorithms.
+A C++ implementation of online machine learning algorithms
 
 ## Install
 ```
@@ -36,3 +36,8 @@ make python
   - `ap`: averaged perceptron
 - `-e`: number of epoch
 - `-m`: model file name
+
+## Testing a model
+```
+/path/to/install/bin/test_onlineml_model model <TESTING_FILE>
+```
