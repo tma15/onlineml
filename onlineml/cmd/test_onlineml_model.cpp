@@ -21,8 +21,8 @@ int main(int argc, char* argv[]) {
 
     std::ifstream ifs(testfile.c_str());
 
-    int num_corr = 0;
-    int num_total = 0;
+    size_t num_corr = 0;
+    size_t num_total = 0;
     float accuracy = 0.;
 
     while(getline(ifs, line)) {
@@ -32,9 +32,11 @@ int main(int argc, char* argv[]) {
         std::vector<std::string> elems;
         elems = split(line, ' ');
 
+        std::cout << line << std::endl;
+
         std::vector< std::pair<std::string, float> > fv;
         std::string label = elems[0];
-        for (int i=1; i < elems.size(); ++i) {
+        for (size_t i=1; i < elems.size(); ++i) {
 
             std::vector<std::string> f_v = split(elems[i], ':');
 
@@ -44,10 +46,10 @@ int main(int argc, char* argv[]) {
             fv.push_back(std::make_pair(f, v));
         }
 
-        int pred_ = cls.predict(fv);
+        size_t pred_ = cls.predict(fv);
         std::string pred = cls.id2label(pred_);
 
-        int true_ = cls.label2id(label);
+        size_t true_ = cls.label2id(label);
 
         if (true_ == pred_) {
             num_corr += 1;
@@ -55,11 +57,11 @@ int main(int argc, char* argv[]) {
         num_total += 1;
         accuracy = float(num_corr) / float(num_total);
 
-        if (num_total % 1000==0) {
+//        if (num_total % 1000==0) {
             printf("acc:%f (%d/%d) pred:%s (id:%d) true:%s (id:%d)\n",
                     accuracy, num_corr, num_total,
                     pred.c_str(), pred_, label.c_str(), true_);
-        }
+//        }
     }
 
     printf("acc:%f (%d/%d)\n", accuracy, num_corr, num_total);

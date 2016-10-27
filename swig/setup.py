@@ -1,11 +1,16 @@
-#!/usr/bin/env python
+import sys
+import subprocess
 from distutils.core import setup, Extension
 
-__version__ = "0.1"
+def cmd(string):
+    out = subprocess.check_output(string.split(), universal_newlines=True)
+    return out.strip()
+
+__version__ = cmd("train_onlineml_model -v")
 
 example_module = Extension('_onlineml',
     sources=['onlineml_wrap.cxx'],
-    extra_compile_args=["-O3"],
+    extra_compile_args=["-O9"],
     language="c++",
 )
 setup(

@@ -27,6 +27,7 @@ make python
 - `value` .=. real value
 
 ## Training a model
+A model can be trained with Iterative Parameter Mixture that is a parallel training method.
 ```
 /path/to/install/bin/train_onlineml_model -a (a|ap) -e <NUM_EPOCH> -m <MODEL_FILE> <TESTING_FILE> <TRAINING_FILE>
 ```
@@ -36,6 +37,7 @@ make python
   - `ap`: averaged perceptron
 - `-e`: number of epoch
 - `-m`: model file name
+- `-p`: number of threads
 
 ## Testing a model
 ```
