@@ -6,9 +6,6 @@
 #endif
 
 class Learner {
-    private:
-        virtual void expand_params(int i){};
-        virtual void expand_params(int i, int j){};
     public:
         Dict features;
         Dict labels;
@@ -18,40 +15,90 @@ class Learner {
             this->features = Dict();
             this->labels = Dict();
         };
-        ~Learner(){};
-        void fit(std::vector< std::vector< std::pair<std::string, float> > > x,
-                std::vector<std::string> y);
+        virtual ~Learner(){};
+        virtual void expand_params(size_t i){};
+        virtual void expand_params(size_t i, size_t j){};
 
-        int predict(std::vector< std::pair<std::string, float> > x);
-        const char* id2label(int id);
-        int label2id(std::string label);
+        void fit(std::vector< std::vector< std::pair<std::string, float> > >& x,
+                std::vector<std::string>& y);
+        void fit(std::vector< std::vector< std::pair<size_t, float> > >& x,
+                std::vector<size_t>& y);
+        virtual void terminate_fitting() {};
 
-        virtual void update_weight(int true_id, int argmax,
-                std::vector< std::pair<int, float> > fv){};
+        size_t predict(std::vector< std::pair<std::string, float> >& x);
+        const char* id2label(size_t id);
+        size_t label2id(std::string label);
+
+        virtual void update_weight(size_t true_id, size_t argmax,
+                std::vector< std::pair<size_t, float> >& fv){};
         virtual void save(const char*){};
 };
 
-const char* Learner::id2label(int id) {
+const char* Learner::id2label(size_t id) {
     return this->labels.get_elem(id).c_str();
 };
 
-int Learner::label2id(std::string label) {
+size_t Learner::label2id(std::string label) {
     return this->labels.get_id(label);
 };
 
-void Learner::fit(std::vector< std::vector< std::pair<std::string, float> > > x,
-        std::vector<std::string> y) {
-    int num_data = x.size();
-    for (int i=0; i < num_data; i++) {
+void Learner::fit(std::vector< std::vector< std::pair<size_t, float> > >& x,
+        std::vector<size_t>& y) {
+    size_t num_data = x.size();
+
+    for (size_t i=0; i < num_data; ++i) {
+        size_t yid = y[i];
+        
+        std::vector< std::pair<size_t, float> > fv;
+        fv = x[i];
+
+        size_t argmax = -1;
+        float max = -1e50;
+
+        for (size_t j=0; j < this->labels.size(); ++j) {
+            this->expand_params(j);
+            std::vector<float>* w_j = &this->weight[j];
+
+            float dot = 0.;
+
+            /* iterate over features */
+            for (size_t _f=0; _f < fv.size(); ++_f) {
+                size_t fid = fv[_f].first;
+                float val = fv[_f].second;
+
+                this->expand_params(j, fid);
+                dot += val * (*w_j)[fid];
+            }
+
+//            if (dot >= max) {
+            if (dot > max) {
+                argmax = j;
+                max = dot;
+            }
+        }
+
+        if (argmax != yid) {
+            this->update_weight(yid, argmax, fv);
+        }
+    }
+}
+
+
+void Learner::fit(std::vector< std::vector< std::pair<std::string, float> > >& x,
+        std::vector<std::string>& y) {
+    size_t num_data = x.size();
+
+    for (size_t i=0; i < num_data; i++) {
 
         if (!this->labels.has_elem(y[i])) {
             this->labels.add_elem(y[i]);
         }
-        int yid = this->labels.get_id(y[i]);
+        size_t yid = this->labels.get_id(y[i]);
 
         this->expand_params(yid);
         
-        std::vector< std::pair<int, float> > fv;
+        std::vector< std::pair<size_t, float> > fv;
+        fv = std::vector< std::pair<size_t, float> >(x[i].size());
         for (size_t _f = 0; _f < x[i].size(); ++_f) {
             std::string ft = x[i][_f].first;
             float val = x[i][_f].second;
@@ -59,25 +106,33 @@ void Learner::fit(std::vector< std::vector< std::pair<std::string, float> > > x,
             if (!this->features.has_elem(ft)) {
                 this->features.add_elem(ft);
             }
-            int fid = this->features.get_id(ft);
-            std::pair<int, float> ftval = std::make_pair(fid, val);
-            fv.push_back(ftval);
+            size_t fid = this->features.get_id(ft);
+            std::pair<size_t, float> ftval = std::make_pair(fid, val);
+            fv[_f] = ftval;
         }
 
-        int argmax = -1;
+        size_t argmax = -1;
         float max = -1e5;
 
-        for (int j=0; j < this->labels.size(); j++) {
+        for (size_t j=0; j < this->labels.size(); j++) {
             std::vector<float>* w_j = &this->weight[j];
+            if (w_j == NULL) {
+                printf("NULL\n");
+                printf("label %zu %s\n", j, this->labels.elems[j].c_str());
+            }
 
             float dot = 0.;
 
             /* iterate over features */
             for (size_t _f=0; _f < fv.size(); _f++) {
-                int fid = fv[_f].first;
+//                size_t fid = fv[_f].first;
+                size_t fid = fv[_f].first;
                 float val = fv[_f].second;
 
                 this->expand_params(j, fid);
+                if ((*w_j).size() <= fid) {
+                    printf("out of index\n");
+                }
                 dot += val * (*w_j)[fid];
             }
 
@@ -93,10 +148,10 @@ void Learner::fit(std::vector< std::vector< std::pair<std::string, float> > > x,
     }
 }
 
-int Learner::predict(std::vector< std::pair<std::string, float> > x) {
-    int argmax = -1;
+size_t Learner::predict(std::vector< std::pair<std::string, float> >& x) {
+    size_t argmax = -1;
     float max = -1e5;
-    for (int j=0; j < this->labels.size(); j++) {
+    for (size_t j=0; j < this->labels.size(); j++) {
         /* iterate over features */
         float dot = 0;
         for (size_t i=0; i < x.size(); ++i) {
@@ -106,7 +161,7 @@ int Learner::predict(std::vector< std::pair<std::string, float> > x) {
             if (!this->features.has_elem(ft)) {
                 continue;
             }
-            int fid = this->features.get_id(ft);
+            size_t fid = this->features.get_id(ft);
             dot += this->weight[j][fid] * val;
         }
 
@@ -116,8 +171,8 @@ int Learner::predict(std::vector< std::pair<std::string, float> > x) {
         }
 
     }
-    if (argmax == -1) {
-        printf("#label:%d\n", this->labels.size());
+    if (int(argmax) == -1) {
+        printf("#label:%zu\n", this->labels.size());
     }
     return argmax;
 }

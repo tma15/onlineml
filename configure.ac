@@ -33,25 +33,14 @@ AC_CONFIG_MACRO_DIR([m4])
 
 #AC_SUBST
 
-#AC_ARG_WITH([gperf],
-#        [AS_HELP_STRING([--with-gperf],
-#        [profiler @<:@default=check@:>@])],
-#        [],
-#        [with_gperf=check])
-
-#        LIBREADLINE=
-#        AS_IF([test "x$with_gperf" != xno],
-#        [AC_CHECK_LIB([readline], [main],
-#        [AC_SUBST([LIBREADLINE], ["-lreadline -lncurses"])
-#        AC_DEFINE([HAVE_LIBREADLINE], [1],
-#        [Define if you have libreadline])
-#        ],
-#        [if test "x$with_readline" != xcheck; then
-#        AC_MSG_FAILURE(
-#        [--with-readline was given, but test for readline failed])
-#        fi
-#        ], -lncurses)]
-#)
+AC_ARG_ENABLE([debug],
+	      [  --enable-debug    Turn on debugging],
+	      [case "${enableval}" in
+	         yes) debug=true ;;
+		 no)  debug=false ;;
+		 *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+	     esac],[debug=false])
+AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
 
 CXX="g++"
