@@ -5,5 +5,5 @@ onlinemlinclude_HEADERS = \
 			  dict.hpp
 
 
-noinst_LTLIBRARIES = libcommon.la
-libcommon_la_SOURCES = classifier.hpp dict.hpp
+# noinst_LTLIBRARIES = libcommon.la
+# libcommon_la_SOURCES = classifier.hpp dict.hpp
