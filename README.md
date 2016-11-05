@@ -29,7 +29,7 @@ make python
 ## Training a model
 A model can be trained with Iterative Parameter Mixture that is a parallel training method.
 ```
-/path/to/install/bin/train_onlineml_model -a (a|ap) -e <NUM_EPOCH> -m <MODEL_FILE> <TESTING_FILE> <TRAINING_FILE>
+/path/to/install/bin/train_onlineml_model -a (a|ap) -e <NUM_EPOCH> -m <MODEL_FILE> <TRAINING_FILE> <TESTING_FILE>
 ```
 
 - `-a`: learning algorithm
