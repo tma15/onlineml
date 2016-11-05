@@ -21,5 +21,5 @@ DBG =
 PG =
 endif
 
-AM_CPPFLAGS = -pthread -O9 $(DBG) $(PG)
+AM_CPPFLAGS = -pthread -O9 $(DBG) $(PG) -std=c++0x
 AM_LDFLAGS = -lpthread $(PG)

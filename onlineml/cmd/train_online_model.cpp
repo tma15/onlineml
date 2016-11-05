@@ -64,66 +64,9 @@ void* run_trainer(void* arg) {
     return NULL;
 }
 
-int main(int argc, char* argv[]) {
-    ArgParser argparser;
-    argparser.parse_args(argc, argv);
-
-    size_t epoch = argparser.epoch;
-    std::string modelfile = argparser.model_file;
-    std::string alg = argparser.alg;
-
-    printf("epoch:%d\n", epoch);
-    printf("modelfile:%s\n", modelfile.c_str());
-    printf("algoirthm:%s\n", alg.c_str());
-    printf("trainfile:%s\n", argparser.train_file.c_str());
-    if (argparser.test_file != "") {
-        printf("testfile:%s\n", argparser.test_file.c_str());
-    }
-
-    std::ifstream ifs(argparser.train_file.c_str());
-    std::string line;
-
-    std::vector<size_t> y;
-    std::vector< std::vector< std::pair<size_t, float> > > x;
-
-    Dict features;
-    Dict labels;
-    while(getline(ifs, line)) {
-        if (ifs.fail()) {
-            std::cerr << "failed to open file:" << std::endl;
-        }
-        std::vector<std::string> elems;
-        elems = split(line, ' ');
-
-        std::string label = elems[0];
-        
-        std::vector< std::pair<size_t, float> > fv;
-        fv = std::vector< std::pair<size_t, float> >(elems.size()-1);
-        for (size_t i=1; i < elems.size(); ++i) {
-
-            std::vector<std::string> f_v = split(elems[i], ':');
-
-            std::string f = f_v[0];
-            float v = atof(f_v[1].c_str());
-
-            if (!features.has_elem(f)) {
-                features.add_elem(f);
-            }
-            size_t fid = features.get_id(f);
-            std::pair<size_t, float> ftval = std::make_pair(fid, v);
-            fv[i-1] = ftval;
-
-        }
-
-        if (!labels.has_elem(label)) {
-            labels.add_elem(label);
-        }
-        size_t yid = labels.get_id(label);
-
-        y.push_back(yid);
-        x.push_back(fv);
-    }
-
+Learner* ipm(std::vector< std::vector< std::pair<size_t, float> > >& x, std::vector<size_t>& y,
+        size_t epoch, ArgParser& argparser,
+        Dict& labels, Dict& features) {
     printf("training model...\n");
     size_t num_train = x.size();
     size_t num_parallel = argparser.num_parallel;
@@ -235,20 +178,98 @@ int main(int argc, char* argv[]) {
     }
     clock_t end = clock();
     std::cout << "duration = " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
+    return avg_learner;
+};
 
-    avg_learner->save(modelfile.c_str());
+int main(int argc, char* argv[]) {
+    ArgParser argparser;
+    argparser.parse_args(argc, argv);
 
-//    Learner* p = argparser.learner;
-//    for (size_t t=0; t<epoch; t++) {
-//        printf("epoch:%d/%d\n", t+1, epoch);
-//        p->fit(x, y);
-//    }
+    size_t epoch = argparser.epoch;
+    std::string modelfile = argparser.model_file;
+    std::string alg = argparser.alg;
 
-//    p->save(modelfile.c_str());
+    printf("epoch:%d\n", epoch);
+    printf("modelfile:%s\n", modelfile.c_str());
+    printf("algoirthm:%s\n", alg.c_str());
+    printf("trainfile:%s\n", argparser.train_file.c_str());
+    if (argparser.test_file != "") {
+        printf("testfile:%s\n", argparser.test_file.c_str());
+    }
 
+    std::ifstream ifs(argparser.train_file.c_str());
+    std::string line;
+
+    std::vector<size_t> y;
+    std::vector< std::vector< std::pair<size_t, float> > > x;
+
+    Dict features;
+    Dict labels;
+    clock_t start_data = clock();
+
+    if (ifs.fail()) {
+        std::cerr << "failed to open file:" << std::endl;
+    }
+
+    while(getline(ifs, line)) {
+        std::vector<std::string> elems;
+        split(line, ' ', elems);
+
+        std::string label = elems[0];
+        
+        std::vector< std::pair<size_t, float> > fv;
+        size_t num_elem = elems.size();
+        fv = std::vector< std::pair<size_t, float> >(num_elem-1);
+        for (size_t i=1; i < num_elem; ++i) {
+
+            std::vector<std::string> f_v;
+            split(elems[i], ':', f_v);
+
+            std::string f = f_v[0];
+            float v = atof(f_v[1].c_str());
+
+            size_t fid;
+            if (!features.has_elem(f)) {
+                fid = features.add_elem(f);
+            } else {
+                fid = features.get_id(f);
+            }
+            std::pair<size_t, float> ftval = std::make_pair(fid, v);
+            fv[i-1] = ftval;
+
+        }
+
+        size_t yid;
+        if (!labels.has_elem(label)) {
+            yid = labels.add_elem(label);
+        } else {
+            yid = labels.get_id(label);
+        }
+
+        y.push_back(yid);
+        x.push_back(fv);
+    }
+    clock_t end_data = clock();
+    float time_data = (float)(end_data - start_data) / CLOCKS_PER_SEC;
+    printf("reading finished! %f sec.\n", time_data);
+
+    Learner* learner;
+    if (argparser.num_parallel > 1) {
+        learner = ipm(x, y, epoch, argparser, labels, features);
+    } else {
+        learner = argparser.learner;
+        learner->labels = labels;
+        learner->features = features;
+        for (size_t t=0; t<epoch; t++) {
+            printf("epoch:%d/%d\n", t+1, epoch);
+            learner->fit(x, y);
+        }
+    }
+
+    learner->save(modelfile.c_str());
 
     if (argparser.test_file == "") {
-        exit(1);
+        exit(0);
     }
 
     Classifier cls;

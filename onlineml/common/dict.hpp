@@ -1,5 +1,6 @@
 #include <vector>
-#include <map>
+//#include <map>
+#include <unordered_map>
 #include <string.h>
 #include <iostream>
 
@@ -8,12 +9,13 @@
 class Dict {
     public:
         std::vector<std::string> elems;
-        std::map<std::string, size_t> ids;
+//        std::map<std::string, size_t> ids;
+        std::unordered_map<std::string, size_t> ids;
 
         Dict(){};
         size_t size() { return this->elems.size();};
         bool has_elem(std::string elem);
-        void add_elem(std::string elem);
+        size_t add_elem(std::string elem);
         size_t get_id(std::string elem);
         std::string get_elem(size_t id);
 };
@@ -25,10 +27,11 @@ bool Dict::has_elem(std::string elem) {
     return false;
 }
 
-void Dict::add_elem(std::string elem) {
+size_t Dict::add_elem(std::string elem) {
     size_t id = this->elems.size();
     this->elems.push_back(elem);
-    this->ids.insert(std::map<std::string, size_t>::value_type(elem, id));
+    this->ids[elem] = id;
+    return id;
 }
 
 std::string Dict::get_elem(size_t id) {

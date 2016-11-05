@@ -12,7 +12,7 @@ print(__version__)
 
 module = Extension('_onlineml',
     sources=['onlineml_wrap.cxx'],
-#    extra_compile_args=["-O9"],
+    extra_compile_args=["-O9", "-std=c++0x"],
     library_dirs=["../onlineml/cmd/.libs"],
     include_dirs=[".."],
     language="c++",
