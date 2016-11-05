@@ -8,9 +8,13 @@ def cmd(string):
 
 __version__ = cmd("train_onlineml_model -v")
 
-example_module = Extension('_onlineml',
+print(__version__)
+
+module = Extension('_onlineml',
     sources=['onlineml_wrap.cxx'],
-    extra_compile_args=["-O9"],
+#    extra_compile_args=["-O9"],
+    library_dirs=["../onlineml/cmd/.libs"],
+    include_dirs=[".."],
     language="c++",
 )
 setup(
@@ -18,5 +22,6 @@ setup(
     version = __version__,
     author      = "Takuya Makino",
     description = """online machine learning algorithms""",
-    ext_modules = [example_module],
+    ext_modules = [module],
+    py_modules = ["onlineml"],
 )
