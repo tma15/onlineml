@@ -132,6 +132,11 @@ Learner* ipm(std::vector< std::vector< std::pair<size_t, float> > >& x, std::vec
     } else {
         printf("alg:%s\n", argparser.alg.c_str());
     }
+    avg_learner->labels = labels;
+    avg_learner->features = features;
+
+//    avg_learner->expand_params(labels.size());
+//    avg_learner->expand_params(labels.size(), features.size());
 
     for (size_t i=0; i < num_parallel; ++i) {
         pthread_join(threads[i].thread, NULL);
@@ -143,41 +148,50 @@ Learner* ipm(std::vector< std::vector< std::pair<size_t, float> > >& x, std::vec
     for (size_t i=0; i < num_parallel; ++i) {
         Learner* learner_i = threads[i].learner;
         std::vector< std::vector<float> > w = learner_i->weight;
-        Dict feature_dic_i = learner_i->features;
-        Dict label_dic_i = learner_i->labels;
+//        Dict feature_dic_i = learner_i->features;
+//        Dict label_dic_i = learner_i->labels;
 
-        for (size_t j=0; j < label_dic_i.elems.size(); ++j) {
-            std::string y = label_dic_i.elems[j];
-            if (!avg_learner->labels.has_elem(y)) {
-                avg_learner->labels.add_elem(y);
-            }
-        }
+//        for (size_t j=0; j < label_dic_i.elems.size(); ++j) {
+//            std::string y = label_dic_i.elems[j];
+//            if (!avg_learner->labels.has_elem(y)) {
+//                avg_learner->labels.add_elem(y);
+//            }
+//        }
 
-        for (size_t j=0; j < feature_dic_i.elems.size(); ++j) {
-            std::string feature = feature_dic_i.elems[j];
-            if (!avg_learner->features.has_elem(feature)) {
-                avg_learner->features.add_elem(feature);
-            }
-        }
+//        for (size_t j=0; j < feature_dic_i.elems.size(); ++j) {
+//            std::string feature = feature_dic_i.elems[j];
+//            if (!avg_learner->features.has_elem(feature)) {
+//                avg_learner->features.add_elem(feature);
+//            }
+//        }
 
-        for (size_t j=0; j < w.size(); ++j) {
-            std::string y = label_dic_i.elems[j];
+//        for (size_t j=0; j < w.size(); ++j) {
+//            std::string y = label_dic_i.elems[j];
+//            size_t yid = avg_learner->labels.ids[y];
+        size_t wsize = w.size();
+        for (size_t yid=0; yid < wsize; ++yid) {
 
-            size_t yid = avg_learner->labels.ids[y];
             avg_learner->expand_params(yid);
 
-            for (size_t k=0; k < w[j].size(); ++k) {
-                std::string f = feature_dic_i.elems[k];
+//            for (size_t k=0; k < w[j].size(); ++k) {
+//            for (size_t k=0; k < w[yid].size(); ++k) {
+//                std::string f = feature_dic_i.elems[k];
 
-                size_t fid = avg_learner->features.ids[f];
+//                size_t fid = avg_learner->features.ids[f];
+            size_t wysize = w[yid].size();
+            for (size_t fid=0; fid < wysize; ++fid) {
                 avg_learner->expand_params(yid, fid);
-                float w_ = w[j][k];
-                avg_learner->weight[yid][fid] += (w_ / float(num_parallel));
+//                float w_ = w[j][k];
+//                float w_ = w[yid][k];
+                float w_ = w[yid][fid];
+                if (w_ != 0.) {
+                    avg_learner->weight[yid][fid] += (w_ / float(num_parallel));
+                }
             }
         }
     }
     clock_t end = clock();
-    std::cout << "duration = " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
+    std::cout << "time for merging: " << (double)(end - start) / CLOCKS_PER_SEC << "sec.\n";
     return avg_learner;
 };
 
