@@ -64,12 +64,28 @@ void* run_trainer(void* arg) {
     return NULL;
 }
 
+Learner* generate_learner(std::string alg) {
+    Learner* learner;
+    if (alg == "p") {
+        learner = new Perceptron();
+    } else if (alg == "ap") {
+        learner = new AveragedPerceptron();
+    } else {
+        printf("alg:%s\n", alg.c_str());
+        exit(1);
+    }
+    return learner;
+}
+
 Learner* ipm(std::vector< std::vector< std::pair<size_t, float> > >& x, std::vector<size_t>& y,
-        size_t epoch, ArgParser& argparser,
+//        size_t epoch, ArgParser& argparser,
+        size_t epoch,
+        std::string alg,
+        size_t num_parallel,
         Dict& labels, Dict& features) {
     printf("training model...\n");
     size_t num_train = x.size();
-    size_t num_parallel = argparser.num_parallel;
+//    size_t num_parallel = argparser.num_parallel;
     size_t avg = num_train / num_parallel;
     std::vector<size_t> start_idx = std::vector<size_t>(num_parallel, 0);
     std::vector<size_t> end_idx = std::vector<size_t>(num_parallel, 0);
@@ -90,15 +106,7 @@ Learner* ipm(std::vector< std::vector< std::pair<size_t, float> > >& x, std::vec
         printf("thread id:%d training idx: %d => %d\n", i, start_idx[i], end_idx[i]);
 #endif
 
-        Learner* learner_i;
-        if (argparser.alg == "p") {
-            learner_i = new Perceptron();
-        } else if (argparser.alg == "ap") {
-            learner_i = new AveragedPerceptron();
-        } else {
-            printf("alg:%s\n", argparser.alg.c_str());
-        }
-
+        Learner* learner_i = generate_learner(alg);
         learner_i->labels = labels;
         learner_i->features = features;
 
@@ -124,23 +132,12 @@ Learner* ipm(std::vector< std::vector< std::pair<size_t, float> > >& x, std::vec
         pthread_create(&threads[i].thread, NULL, run_trainer, &threads[i]);
     }
 
-    Learner* avg_learner;
-    if (argparser.alg == "p") {
-        avg_learner = new Perceptron();
-    } else if (argparser.alg == "ap") {
-        avg_learner = new AveragedPerceptron();
-    } else {
-        printf("alg:%s\n", argparser.alg.c_str());
-    }
+    Learner* avg_learner = generate_learner(alg);
     avg_learner->labels = labels;
     avg_learner->features = features;
 
-//    avg_learner->expand_params(labels.size());
-//    avg_learner->expand_params(labels.size(), features.size());
-
     for (size_t i=0; i < num_parallel; ++i) {
         pthread_join(threads[i].thread, NULL);
-
     }
 
     /* merge learners */
@@ -148,41 +145,12 @@ Learner* ipm(std::vector< std::vector< std::pair<size_t, float> > >& x, std::vec
     for (size_t i=0; i < num_parallel; ++i) {
         Learner* learner_i = threads[i].learner;
         std::vector< std::vector<float> > w = learner_i->weight;
-//        Dict feature_dic_i = learner_i->features;
-//        Dict label_dic_i = learner_i->labels;
 
-//        for (size_t j=0; j < label_dic_i.elems.size(); ++j) {
-//            std::string y = label_dic_i.elems[j];
-//            if (!avg_learner->labels.has_elem(y)) {
-//                avg_learner->labels.add_elem(y);
-//            }
-//        }
-
-//        for (size_t j=0; j < feature_dic_i.elems.size(); ++j) {
-//            std::string feature = feature_dic_i.elems[j];
-//            if (!avg_learner->features.has_elem(feature)) {
-//                avg_learner->features.add_elem(feature);
-//            }
-//        }
-
-//        for (size_t j=0; j < w.size(); ++j) {
-//            std::string y = label_dic_i.elems[j];
-//            size_t yid = avg_learner->labels.ids[y];
         size_t wsize = w.size();
         for (size_t yid=0; yid < wsize; ++yid) {
 
-            avg_learner->expand_params(yid);
-
-//            for (size_t k=0; k < w[j].size(); ++k) {
-//            for (size_t k=0; k < w[yid].size(); ++k) {
-//                std::string f = feature_dic_i.elems[k];
-
-//                size_t fid = avg_learner->features.ids[f];
             size_t wysize = w[yid].size();
             for (size_t fid=0; fid < wysize; ++fid) {
-                avg_learner->expand_params(yid, fid);
-//                float w_ = w[j][k];
-//                float w_ = w[yid][k];
                 float w_ = w[yid][fid];
                 if (w_ != 0.) {
                     avg_learner->weight[yid][fid] += (w_ / float(num_parallel));
@@ -211,7 +179,6 @@ int main(int argc, char* argv[]) {
         printf("testfile:%s\n", argparser.test_file.c_str());
     }
 
-    std::ifstream ifs(argparser.train_file.c_str());
     std::string line;
 
     std::vector<size_t> y;
@@ -221,55 +188,16 @@ int main(int argc, char* argv[]) {
     Dict labels;
     clock_t start_data = clock();
 
-    if (ifs.fail()) {
-        std::cerr << "failed to open file:" << std::endl;
-    }
+    read_data(argparser.train_file.c_str(),
+            labels, features, y, x);
 
-    while(getline(ifs, line)) {
-        std::vector<std::string> elems;
-        split(line, ' ', elems);
-
-        std::string label = elems[0];
-        
-        std::vector< std::pair<size_t, float> > fv;
-        size_t num_elem = elems.size();
-        fv = std::vector< std::pair<size_t, float> >(num_elem-1);
-        for (size_t i=1; i < num_elem; ++i) {
-
-            std::vector<std::string> f_v;
-            split(elems[i], ':', f_v);
-
-            std::string f = f_v[0];
-            float v = atof(f_v[1].c_str());
-
-            size_t fid;
-            if (!features.has_elem(f)) {
-                fid = features.add_elem(f);
-            } else {
-                fid = features.get_id(f);
-            }
-            std::pair<size_t, float> ftval = std::make_pair(fid, v);
-            fv[i-1] = ftval;
-
-        }
-
-        size_t yid;
-        if (!labels.has_elem(label)) {
-            yid = labels.add_elem(label);
-        } else {
-            yid = labels.get_id(label);
-        }
-
-        y.push_back(yid);
-        x.push_back(fv);
-    }
     clock_t end_data = clock();
     float time_data = (float)(end_data - start_data) / CLOCKS_PER_SEC;
     printf("reading finished! %f sec.\n", time_data);
 
     Learner* learner;
     if (argparser.num_parallel > 1) {
-        learner = ipm(x, y, epoch, argparser, labels, features);
+        learner = ipm(x, y, epoch, argparser.alg, argparser.num_parallel, labels, features);
     } else {
         learner = argparser.learner;
         learner->labels = labels;
@@ -315,12 +243,9 @@ int main(int argc, char* argv[]) {
             fv.push_back(std::make_pair(f, v));
         }
 
-//        size_t pred_ = p->predict(fv);
-//        std::string pred = p->id2label(pred_);
         size_t pred_ = cls.predict(fv);
         std::string pred = cls.id2label(pred_);
 
-//        size_t true_ = p->label2id(label);
         size_t true_ = cls.label2id(label);
 
         if (true_ == pred_) {
