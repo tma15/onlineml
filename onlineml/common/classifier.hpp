@@ -105,7 +105,7 @@ void Classifier::load(const char* filename) {
         }
     }
     fclose(fp);
-    printf("\nloaded algorithm:%s\n", algorithm.c_str());
+//    printf("\nloaded algorithm:%s\n", algorithm.c_str());
 }
 
 
