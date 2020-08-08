@@ -1,0 +1,6 @@
+#include "classifier.h"
+#include "classifiers/perceptron.h"
+#include "data.h"
+#include "parameter.h"
+#include "string_process.h"
+#include "trainer.h"

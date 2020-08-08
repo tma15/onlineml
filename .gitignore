@@ -8,6 +8,7 @@
 *.so
 *.so.*
 local
+build
 
 # http://www.gnu.org/software/automake
 
