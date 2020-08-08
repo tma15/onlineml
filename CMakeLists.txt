@@ -10,4 +10,5 @@ add_executable(onlineml-evaluate onlineml/onlineml_cli/evaluate.cc)
 target_link_libraries(onlineml-train onlineml)
 target_link_libraries(onlineml-evaluate onlineml)
 
-#install()
+install(TARGETS onlineml-train)
+install(TARGETS onlineml-evaluate)

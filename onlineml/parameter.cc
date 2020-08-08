@@ -16,6 +16,8 @@ Tensor::Tensor(std::initializer_list<unsigned> dims) : dims_(dims.begin(), dims.
   for (unsigned i = 0; i < numel_; ++i) {
     data_.get()[i] = 0.;
   }
+//  storage_ = std::make_shared<Storage>();
+//  storage_->allocate(numel_);
 
   strides_ = std::vector<unsigned>(dims_.size());
   for (unsigned i = 0; i < dims_.size(); ++i) {
@@ -66,25 +68,10 @@ const unsigned Tensor::argmax() const {
 Tensor Tensor::operator[](unsigned idx) {
   unsigned numel_i = numel_ / dims_[0];
   unsigned offset = idx * numel_i;
-//  std::cout << "numel:" << numel_ << " " << idx << " " << numel_i << std::endl;
-//  std::cout << "offset:" << offset << std::endl;
   std::shared_ptr<float> data_i(data_, data_.get() + offset);
-//  std::shared_ptr<float> data_i = std::shared_ptr<float>(data_.get() + offset);;
-//  std::shared_ptr<float> data_i = data_ + offset;;
-//  float *data_i = data_.get() + offset;;
-//  std::cout << data_.get()[0] << " " << data_.get()[1] << std::endl;
-//  std::cout << data_i.get()[0] << " " << data_i.get()[1] << std::endl;
   std::vector<unsigned> dims_i(dims_.begin() + 1, dims_.end());
-//  for (unsigned i = 0; i < dims_i.size(); ++i) {
-//    std::cout << "dim:" << dims_i[i] << std::endl;
-//  }
-
-//  return Tensor(std::shared_ptr<float>(data_i), dims_i);
   return Tensor(data_i, dims_i);
 }
-
-
-
 
 
 
@@ -102,7 +89,6 @@ void Tensor::index_add_(std::initializer_list<unsigned> dims, float val) {
   for (unsigned d = 0; d < tmp.size(); ++d) {
     offset += tmp[d] * strides_[d];
   }
-//  std::cout << "offset:" << offset << std::endl;
   data_.get()[offset] += val;
 }
 
@@ -112,7 +98,6 @@ Tensor arange(unsigned numel, std::initializer_list<unsigned> dims) {
   float *data = tensor.data_ptr().get();
   for (unsigned i = 0; i < numel; ++i) {
     data[i] = (float)i;
-//    tensor.data_ptr().get()[i] = (float)i;
   }
   return tensor;
 }
@@ -131,10 +116,8 @@ Tensor operator*(Tensor tensor, const SparseVector &vec) {
     for (unsigned i = 0; i < vec.size(); ++i) {
       unsigned key = vec.at(i).id;
       float value = vec.at(i).value;
-//      std::cout << key << ":" << value << " * " << tensor[y][key].scalar() << std::endl;
       out.index_add_({y}, value * tensor[y][key].scalar());
     }
-//    std::cout << "out[" << y << "] = " << out[y].scalar() << std::endl;
   }
   return out;
 }
@@ -144,9 +127,6 @@ Tensor operator*(Tensor tensor, const SparseVector &vec) {
 void save(Tensor tensor, const std::string &file) {
   FILE *fp = fopen(file.c_str(), "wb");
   fwrite(tensor.data_ptr().get(), sizeof(float), tensor.numel(), fp);
-//  for (unsigned i = 0; i < tensor.numel(); ++i) {
-//    std::cout << "save " << tensor.data_ptr()[i] << std::endl;
-//  }
   fclose(fp);
 }
 
@@ -154,14 +134,9 @@ void save(Tensor tensor, const std::string &file) {
 
 void load(Tensor tensor, const std::string &file) {
   FILE *fp = fopen(file.c_str(), "rb");
-//  float *data = new float[tensor.numel()];
   std::shared_ptr<float> data = std::shared_ptr<float>(new float[tensor.numel()]);
   fread(data.get(), sizeof(float), tensor.numel(), fp);
-//  memmove(data, tensor.data_ptr(), tensor.numel());;
   memcpy(tensor.data_ptr().get(), data.get(), sizeof(float) * tensor.numel());;
-//  for (unsigned i = 0; i < tensor.numel(); ++i) {
-//    std::cout << "load " << data[i] << " " << tensor.data_ptr()[i] << std::endl;
-//  }
   fclose(fp);
 }
 

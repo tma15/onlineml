@@ -9,7 +9,19 @@ namespace onlineml {
 class Storage {
   public:
     Storage() {}
+    
+    ~Storage() {
+      delete data_;
+    }
+
+    void allocate(unsigned size){
+      data_ = new float[size];
+    };
+
+  private:
+    float *data_;
 };
+
 
 
 class Tensor {
@@ -36,6 +48,7 @@ class Tensor {
 
   private:
     std::shared_ptr<float> data_;
+//    std::shared_ptr<Storage> storage_;
     std::vector<unsigned> dims_;
     std::vector<unsigned> strides_;
     unsigned numel_;
