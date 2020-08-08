@@ -12,5 +12,7 @@ make install
 ```
 
 ## Training & evaluation
+```
 ./onlineml-train <train_file>
 ./onlineml-evaluate <test_file>
+```
