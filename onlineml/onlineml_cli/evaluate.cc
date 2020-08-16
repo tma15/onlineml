@@ -1,9 +1,16 @@
 #include "../onlineml.h"
 
 int main(int argc, char** argv) {
+  onlineml::ArgumentParser parser;
+  parser.add_argument("--input_file");
+  parser.add_argument("--model_dir");
+  parser.parse_args(argc, argv);
 
-  onlineml::Dictionary feature_dictionary = onlineml::Dictionary::load("./feature.dict");
-  onlineml::Dictionary label_dictionary = onlineml::Dictionary::load("./label.dict");
+  std::string input_file = parser.get<std::string>("input_file");
+  std::string model_dir = parser.get<std::string>("model_dir");
+
+  onlineml::Dictionary feature_dictionary = onlineml::Dictionary::load(model_dir + "/feature.dict");
+  onlineml::Dictionary label_dictionary = onlineml::Dictionary::load(model_dir + "/label.dict");
 
   feature_dictionary.freeze(true);
   label_dictionary.freeze(true);
@@ -12,13 +19,13 @@ int main(int argc, char** argv) {
       new onlineml::Perceptron(
         feature_dictionary.size(),
         label_dictionary.size()));
-  classifier->load("classifier.om");
+  classifier->load(model_dir + "/classifier.om");
 
   unsigned num_correct = 0;
   unsigned num_total = 0;
 
   onlineml::DataLoader data_loader(
-    argv[1],
+    input_file,
     feature_dictionary,
     label_dictionary);
   for (auto &labeled_vec : data_loader) {

@@ -16,8 +16,7 @@ int OnlineMLTrainer::train() {
         data_loader_.feature_dictionary().size(),
         data_loader_.label_dictionary().size()));
 
-  unsigned max_epoch = 20;
-  for (unsigned epoch = 0; epoch < max_epoch; ++epoch) {
+  for (unsigned epoch = 0; epoch < options_.max_epoch(); ++epoch) {
     unsigned num_total = 0;
     float num_wrong = 0;
     for (auto &labeled_vec : data_loader_) {
