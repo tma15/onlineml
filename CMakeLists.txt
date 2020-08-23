@@ -14,5 +14,6 @@ add_executable(onlineml-evaluate
 target_link_libraries(onlineml-train onlineml)
 target_link_libraries(onlineml-evaluate onlineml)
 
+install(TARGETS onlineml LIBRARY DESTINATION lib)
 install(TARGETS onlineml-train)
 install(TARGETS onlineml-evaluate)

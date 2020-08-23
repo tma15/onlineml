@@ -4,10 +4,12 @@ int main(int argc, char** argv) {
   onlineml::ArgumentParser parser;
   parser.add_argument("--input_file");
   parser.add_argument("--model_dir");
+  parser.add_argument("--verbose");
   parser.parse_args(argc, argv);
 
   std::string input_file = parser.get<std::string>("input_file");
   std::string model_dir = parser.get<std::string>("model_dir");
+  int verbose = parser.get<int>("verbose");
 
   onlineml::Dictionary feature_dictionary = onlineml::Dictionary::load(model_dir + "/feature.dict");
   onlineml::Dictionary label_dictionary = onlineml::Dictionary::load(model_dir + "/label.dict");
@@ -30,6 +32,13 @@ int main(int argc, char** argv) {
     label_dictionary);
   for (auto &labeled_vec : data_loader) {
     unsigned argmax = classifier->predict(labeled_vec.vector());
+
+    if (verbose > 0) {
+      std::cout << label_dictionary.get_elem(labeled_vec.label())
+                << " " << label_dictionary.get_elem(argmax)
+                << std::endl;
+    }
+
     if (argmax == labeled_vec.label()) {
       num_correct++;
     }
