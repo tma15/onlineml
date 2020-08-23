@@ -1,6 +1,7 @@
 
 set(
 	HEADER_FIELS
+	argparser.h
 	classifier.h
 	classifiers/perceptron.h
 	data.h

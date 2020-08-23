@@ -4,13 +4,17 @@
 
 
 int main(int argc, char** argv) {
+  onlineml::ArgumentParser parser;
+  parser.add_argument("--input_file");
+  parser.add_argument("--max_epoch", "10");
+  parser.parse_args(argc, argv);
+
   onlineml::OnlineMLTrainerOptions options;
-  for (unsigned i = 0; i < argc; ++i) {
-    std::cout << i << ":" << argv[i] << std::endl;
-  }
-  options = options.input_file(argv[1]);
+  options = options.input_file(parser.get<std::string>("input_file"));
+  options = options.max_epoch(parser.get<unsigned>("max_epoch"));
 
   std::cout << "input_file: " << options.input_file() << std::endl;
+  std::cout << "max_epoch: " << options.max_epoch() << std::endl;
 
   onlineml::OnlineMLTrainer trainer(options);
   trainer.train();

@@ -14,10 +14,17 @@ class OnlineMLTrainerOptions {
       return *this;
     }
 
+    OnlineMLTrainerOptions max_epoch(unsigned max_epoch) {
+      max_epoch_ = max_epoch;
+      return *this;
+    }
+
     const std::string &input_file() { return input_file_; }
+    const unsigned &max_epoch() { return max_epoch_; }
 
   private:
     std::string input_file_;
+    unsigned max_epoch_;
 };
 
 
